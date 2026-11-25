@@ -755,6 +755,7 @@ tr.g-recuperable td { color: var(--muted); } tr.g-pago_proveedor td { background
     </div>
   </header>
   <script src="/hub/banner.js?v=16"></script>
+  <script src="/hub/selector.js?v=9"></script><!-- (Infra, 25-nov) lista de módulos del banner y «la puerta»; version.js no lo duplica si ya está -->
   <script>/* la moneda del banner: banner.js todavía no conoce «importaciones» (Hub v85 la reservó); si quedó vacía, el barco */
   (function(){ var m = document.querySelector('.ab-banner .ab-moneda'); if (m && !m.innerHTML.trim()) m.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 20a2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1M4 18l-1-5h18l-2 4M5 13V7h8l4 6M9 7V4h3v3"/></svg>'; })();</script>
   <main>
