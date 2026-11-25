@@ -1,12 +1,12 @@
 // Service Worker · network-first para HTML, cache-first para assets
-const CACHE_VERSION = 'impo-v3-hub-sin-cache';
+const CACHE_VERSION = 'impo-v4-cache-propia';
 const CACHE_ASSETS = ['fonts/URWGothic-Book.ttf', './', './index.html', './manual.js', './adorno-tablas.js', './manifest.webmanifest'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_VERSION).then(c => c.addAll(CACHE_ASSETS)).catch(err => console.warn('[SW]', err)));
   self.skipWaiting();
 });
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k)))));
+  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('impo-') && k !== CACHE_VERSION).map(k => caches.delete(k)))));
   self.clients.claim();
 });
 self.addEventListener('fetch', e => {
