@@ -1,0 +1,16 @@
+{
+  "name": "Importaciones Adorno",
+  "short_name": "Importaciones",
+  "description": "Carpetas, paso a paso y costeo de cada importación — Claudia Adorno SRL",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8A7B70",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192-moneda.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-moneda.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512-mascara.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
