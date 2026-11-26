@@ -1158,7 +1158,7 @@ function copiar(t){ navigator.clipboard && navigator.clipboard.writeText(t).then
 const estadoDoc = conPermiso('documentos', async function(id, est){ const { error } = await DB.from('impo_documentos').update({ estado: est, fecha: est === 'ok' ? hoyAR() : null }).eq('id', id); if (error) return avisarErr(error, 'No se pudo guardar'); await cargarFicha(); renderFicha(); refrescarImpo(); }, 'Marcó un documento');
 function editarDoc(id){ const d = DOCS.find(x => x.id === id);
   modal(`<div class="m-head"><h3>${esc(d.nombre)}</h3><span class="spacer"></span><button class="btn ico" onclick="abrirFicha(${SEL.id}, 'docs')" title="Volver">${_i('x')}</button></div>
-    <div class="form"><label style="grid-column:1/-1">Nombre del archivo en la carpeta <input id="ed-arch" value="${esc(d.archivo || '')}" placeholder="${esc(SEL.proveedor)} - ${esc(d.nombre.toUpperCase().split(' (')[0])}.pdf"></label>
+    <div class="form"><label style="grid-column:1/-1">Nombre del archivo en la carpeta <input id="ed-arch" value="${esc(d.archivo || '')}" placeholder="${esc(SEL.numero)} ${esc(SEL.proveedor)} - ${esc(d.nombre.toUpperCase().split(' (')[0])}.pdf"></label>
     <label style="grid-column:1/-1">Link (OneDrive compartido, opcional) <input id="ed-link" value="${esc(d.link || '')}"></label>
     <label>Fecha <input id="ed-fecha" type="date" value="${d.fecha || ''}"></label><label>Obligatorio <select id="ed-obl"><option value="true" ${d.obligatorio ? 'selected' : ''}>Sí</option><option value="false" ${!d.obligatorio ? 'selected' : ''}>No</option></select></label>
     <label style="grid-column:1/-1">Nota <textarea id="ed-nota" rows="2">${esc(d.notas || '')}</textarea></label></div>
@@ -1357,7 +1357,7 @@ function _i(n){ return ({
 const PLUS_SVG = '<svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
 
 </script>
-<script src="manual.js?v=4"></script>
+<script src="manual.js?v=5"></script>
 <script src="adorno-tablas.js?v=abc48a63"></script>
 </body>
 </html>
