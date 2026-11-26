@@ -704,7 +704,8 @@ main { padding: 20px; max-width: 1500px; margin: 0 auto; }
 .chk { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #cbd5e1; background: #fff; flex: none; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; color: #fff; margin-top: 2px; }
 .chk .ico { width: 16px; height: 16px; } .chk.hecho { background: var(--green); border-color: var(--green); } .chk.en_curso { background: var(--amber); border-color: var(--amber); } .chk.no_aplica { background: #cbd5e1; border-color: #cbd5e1; } .chk:disabled { cursor: default; }
 .dest { border: none; border-radius: 999px; padding: 4px 10px; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; flex: none; margin-top: 2px; } .dest.falta { background: var(--red-bg); color: var(--red); } .dest.borrador { background: var(--amber-bg); color: var(--amber); } .dest.ok { background: var(--green-bg); color: var(--green); } .dest.no_aplica { background: var(--gray-light); color: var(--muted); }
-.carpeta { background: var(--primary-bg); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; } .carpeta code { font-size: 12.5px; }
+.carpeta { background: var(--primary-bg); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; } .carpeta code { font-size: 12.5px; } .carpeta a.btn { text-decoration: none; padding: 4px 11px; font-size: 12px; }
+.arch-link { color: var(--primary); text-decoration: none; font-weight: 600; } .arch-link:hover { text-decoration: underline; }
 .nov-in { display: flex; gap: 6px; align-items: center; } .nov-in textarea, .nov-in input { flex: 1; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; font-family: inherit; font-size: 14px; } .nov-in select { border: 1px solid var(--border); border-radius: 10px; padding: 8px; font: inherit; }
 .novs { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; } .nov { background: #f8fafc; border-radius: 10px; padding: 8px 10px; font-size: 14px; white-space: pre-wrap; } .nov.estado, .nov.paso, .nov.sistema, .nov.documento { background: var(--primary-bg); font-size: 13px; }
 /* costeo */
@@ -774,7 +775,7 @@ tr.g-recuperable td { color: var(--muted); } tr.g-pago_proveedor td { background
     <section id="content-costeo" class="tab-content">
       <div class="pils">
         <label class="pil on" title="Importación"><svg class="ico" viewBox="0 0 24 24"><path d="M2 20V6a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg><span id="pl-impo">Elegí la importación</span><select id="k-impo" class="over" onchange="elegirCosteo(this.value)"></select></label>
-        <label class="pil" title="Escenario"><svg class="ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-6 4 3 5-7"/></svg><span id="pl-esc">Costo real</span><select id="k-esc" class="over" onchange="renderCosteo()"><option value="real">Costo real (como se pagó)</option><option value="sin_desc">Sin descuento (próximo pedido)</option><option value="hibrido">FOB pleno + despacho real (reposición)</option></select></label>
+        <label class="pil" title="Escenario"><svg class="ico" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-6 4 3 5-7"/></svg><span id="pl-esc">Costo real</span><select id="k-esc" class="over" onchange="cambiarCriterio(this.value)"><option value="real">Costo real (como se pagó)</option><option value="sin_desc">Sin descuento (próximo pedido)</option><option value="hibrido">Precio pleno + arancel real (como se costeó)</option></select></label>
         <button class="pil" onclick="exportarCosteo()" title="Bajar el costeo a Excel"><svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Excel</span></button>
       </div>
       <div id="k-vacio" class="empty">Elegí una importación arriba (o abrila desde Importaciones → Costeo).</div>
@@ -1136,16 +1137,20 @@ const agregarPaso = conPermiso('pasos', async function(){
 }, 'Agregó un paso');
 // ── Documentos ──
 const DEST = { falta: 'Falta', borrador: 'Borrador / parcial', ok: 'Está', no_aplica: 'No aplica' };
+// OneDrive de la empresa (cuenta office@claudiaadorno): la ruta anotada en «carpeta» + el nombre del archivo arman el link web.
+const ONEDRIVE_BASE = 'https://claudiaadorno-my.sharepoint.com/personal/office_claudiaadorno_onmicrosoft_com/Documents/';
+function urlOneDrive(ruta){ return ruta ? ONEDRIVE_BASE + String(ruta).replace(/\\/g, '/').replace(/^\/+|\/+$/g, '').split('/').map(encodeURIComponent).join('/') : null; }
+function linkDoc(d){ if (d.link) return d.link; if (SEL.carpeta && d.archivo) return urlOneDrive(SEL.carpeta + '/' + d.archivo); return null; }
 function htmlDocs(){
   const puede = ve('documentos');
-  const carp = SEL.carpeta ? `<div class="carpeta"><span class="mini">Carpeta en el OneDrive:</span> <code>${esc(SEL.carpeta)}</code> <button class="btn ico" onclick="copiar('${esc(SEL.carpeta).replace(/'/g, "\\'")}')" title="Copiar la ruta">${_i('copy')}</button></div>` : `<div class="mini" style="margin-bottom:8px">Sin carpeta anotada (se carga en Datos). Conviene: IMPORTACIONES/${SEL.anio}/${String(SEL.nro).padStart(2, '0')} - ${esc(SEL.proveedor)}</div>`;
+  const carp = SEL.carpeta ? `<div class="carpeta"><span class="mini">Carpeta en el OneDrive:</span> <code>${esc(SEL.carpeta)}</code> <a class="btn chico" href="${esc(urlOneDrive(SEL.carpeta))}" target="_blank" rel="noopener" title="Abrir la carpeta en el OneDrive web">📂 Abrir carpeta</a> <button class="btn ico" onclick="copiar('${esc(SEL.carpeta).replace(/'/g, "\\'")}')" title="Copiar la ruta">${_i('copy')}</button></div>` : `<div class="mini" style="margin-bottom:8px">Sin carpeta anotada (se carga en Datos). Conviene: IMPORTACIONES/${SEL.anio}/${String(SEL.nro).padStart(2, '0')} - ${esc(SEL.proveedor)}</div>`;
   return carp + FASES.map(f => { const L = DOCS.filter(d => d.fase === f); if (!L.length) return '';
     return `<div class="fase"><div class="fase-h"><span>${esc(f)}</span><span class="count">${L.filter(d => d.estado === 'ok').length}/${L.filter(d => d.estado !== 'no_aplica').length}</span></div>
       ${L.map(d => `<div class="doc e-${d.estado}">
         <select class="dest ${d.estado}" onchange="estadoDoc(${d.id}, this.value)" ${puede ? '' : 'disabled'}>${Object.keys(DEST).map(e => `<option value="${e}" ${e === d.estado ? 'selected' : ''}>${DEST[e]}</option>`).join('')}</select>
         <div class="pb"><div class="tt">${esc(d.nombre)}${d.obligatorio ? '' : ' <span class="chip gray chico">opcional</span>'}</div>
           ${d.notas ? `<div class="mini">📝 ${esc(d.notas)}</div>` : ''}
-          <div class="mini arch">${d.archivo ? `📎 ${esc(d.archivo)}` : ''}${d.link ? ` · <a href="${esc(d.link)}" target="_blank" rel="noopener">abrir</a>` : ''}${d.fecha ? ` · ${fmtF(d.fecha)}` : ''}</div></div>
+          <div class="mini arch">${d.archivo ? (linkDoc(d) ? `<a class="arch-link" href="${esc(linkDoc(d))}" target="_blank" rel="noopener" title="Abrir el archivo en el OneDrive (para ver o imprimir)">📎 ${esc(d.archivo)} ↗</a>` : `📎 ${esc(d.archivo)}`) : (d.link ? `<a class="arch-link" href="${esc(d.link)}" target="_blank" rel="noopener">🔗 abrir</a>` : '')}${d.fecha ? ` · ${fmtF(d.fecha)}` : ''}</div></div>
         <div class="acc">${puede ? `<button class="btn ico" onclick="editarDoc(${d.id})" title="Nombre del archivo, link, nota">${_i('edit')}</button>` : ''}</div></div>`).join('')}</div>`; }).join('') +
     (puede ? `<div class="nov-in" style="margin-top:10px"><input id="nd-tit" placeholder="Agregar un documento propio de esta importación…"><select id="nd-fase">${FASES.map(f => `<option>${f}</option>`).join('')}</select><button class="btn primary ico" onclick="agregarDoc()" title="Agregar">${_i('plus')}</button></div>` : '');
 }
@@ -1215,10 +1220,12 @@ async function elegirCosteo(id){
   if (i.error || g.error) return avisarErr(i.error || g.error, 'No pude leer el costeo');
   ITEMS = i.data || []; GASTOS = g.data || [];
   $('#k-vacio').style.display = 'none'; $('#k-cuerpo').style.display = '';
-  $('#k-tc').value = KSEL.tc ? num(KSEL.tc, 2) : ''; $('#k-te').value = num(KSEL.tasa_estadistica, 2); $('#k-desc').value = num(KSEL.descuento_pct, 2);
+  $('#k-tc').value = KSEL.tc ? num(KSEL.tc, 2) : ''; $('#k-te').value = num(KSEL.tasa_estadistica, 2); $('#k-desc').value = num(KSEL.descuento_pct, 2); $('#k-esc').value = KSEL.criterio_costeo || 'real';
   ['fob', 'cif', 'derechos', 'tasa'].forEach(k => { $('#k-d' + (k === 'derechos' ? 'der' : k)).value = KSEL['dua_' + k] != null ? num(KSEL['dua_' + k], 2) : ''; });
   renderCosteo();
 }
+// El escenario elegido queda guardado como criterio de esa importación (criterio_costeo): es el costo que vale para precios y stock.
+async function cambiarCriterio(v){ renderCosteo(); if (!KSEL || !ve('costeo')) return; const { error } = await DB.from('impo_importaciones').update({ criterio_costeo: v }).eq('id', KSEL.id); if (error) return avisarErr(error, 'No se pudo guardar el criterio'); KSEL.criterio_costeo = v; const x = IMPOS.find(y => y.id === KSEL.id); if (x) x.criterio_costeo = v; toast('Criterio de costeo guardado para esta importación', 'success'); }
 const guardarParam = conPermiso('costeo', async function(k, v){
   const n = aNum(v); const { error } = await DB.from('impo_importaciones').update({ [k]: n }).eq('id', KSEL.id); if (error) return avisarErr(error, 'No se pudo guardar');
   KSEL[k] = n; const x = IMPOS.find(y => y.id === KSEL.id); if (x) x[k] = n; renderCosteo();
@@ -1252,7 +1259,7 @@ function costear(esc){
 function renderCosteo(){
   if (!KSEL) return;
   const puede = ve('costeo'), esc_ = $('#k-esc').value; $('#pl-esc').textContent = $('#k-esc').selectedOptions[0].textContent.split(' (')[0];
-  $('#k-esc-nota').textContent = esc_ === 'real' ? '— FOB como se pagó, nacionalización como se pagó' : esc_ === 'sin_desc' ? '— FOB a precio pleno y derechos recalculados: lo que va a costar reponerlo' : '— FOB pleno, pero derechos, tasa, flete y gastos del despacho real (para valuar el stock)';
+  $('#k-esc-nota').textContent = esc_ === 'real' ? '— FOB como se pagó, nacionalización como se pagó' : esc_ === 'sin_desc' ? '— FOB a precio pleno y derechos recalculados: lo que va a costar reponerlo' : '— precio de lista del proveedor (sin el descuento de primera compra), con los derechos, tasa, flete y gastos tal como se pagaron en el despacho: el criterio de las importaciones 2026';
   // productos
   $('#k-items tbody').innerHTML = ITEMS.map(it => `<tr data-id="${it.id}">${[['codigo', 'text'], ['descripcion', 'text'], ['cantidad', 'num'], ['fob_unit', 'num', 4]].map(([k, t, d]) => `<td class="${t === 'num' ? 'num' : ''}">${puede ? `<input class="cel ${t}" data-k="${k}" value="${t === 'num' ? num(it[k], d || 2) : esc(it[k] || '')}" onchange="celItem(${it.id}, '${k}', this.value)">` : (t === 'num' ? num(it[k], d || 2) : esc(it[k] || ''))}</td>`).join('')}
     <td class="num">${num((+it.cantidad || 0) * (+it.fob_unit || 0))}</td>
@@ -1317,7 +1324,7 @@ async function exportarCosteo(){
     const filas = K.filas.map(f => ({ 'Código': f.codigo || '', 'Descripción': f.descripcion, 'Ítem DUA': f.item_dua || '', 'NCM': f.ncm || '', 'Cant.': f.cant, 'FOB unit. USD': f.cant ? f.fobT / f.cant : 0, 'FOB total USD': f.fobT, 'CBM': f.cbmN, '% DI': f.di, 'Base imp. (CIF x valor)': f.base, 'Derechos': f.der, 'Tasa est.': f.tasa, 'Flete (x CBM)': f.fl, 'Seguro+gastos (x valor)': f.sg, 'Costo total USD': f.total, 'Costo unit. USD': f.unit, 'Costo unit. ARS': f.unitArs, 'Factor': f.factor, ['PV x' + m[0]]: f.unit * m[0], ['PV x' + m[1]]: f.unit * m[1], ['PV x' + m[2]]: f.unit * m[2] }));
     filas.push({ 'Código': 'TOTAL', 'Cant.': K.tot.cant, 'FOB total USD': K.tot.fobT, 'CBM': K.CBM, 'Base imp. (CIF x valor)': K.tot.base, 'Derechos': K.tot.der, 'Tasa est.': K.tot.tasa, 'Flete (x CBM)': K.tot.fl, 'Seguro+gastos (x valor)': K.tot.sg, 'Costo total USD': K.tot.total, 'Factor': K.tot.factor });
     X.utils.book_append_sheet(wb, X.utils.json_to_sheet(filas), nombre); };
-  hoja('real', 'Costeo real'); hoja('sin_desc', 'Sin descuento'); hoja('hibrido', 'FOB pleno + desp real');
+  hoja('real', 'Costeo real'); hoja('sin_desc', 'Sin descuento'); hoja('hibrido', 'Pleno + arancel real');
   const K = costear('real');
   const par = [['PARÁMETROS DEL COSTEO', `${KSEL.numero} · ${KSEL.proveedor}${KSEL.dua ? ' · DUA ' + KSEL.dua : ''}`], ['Criterio', 'Costo real en USD. Sin IVA, IVA adicional, percepción de Ganancias ni IIBB (recuperables).'],
     ['FOB total', K.FOBreal], ['Flete internacional', K.flete], ['Seguro', K.seguro], ['Valor CIF', K.CIFreal], ['Factor CIF/FOB', K.FOBreal ? K.CIFreal / K.FOBreal : null], ['Gastos por FOB', K.poolFob], ['Gastos por CBM', K.poolCbm], ['CBM total', K.CBM], ['Tipo de cambio ARS/USD', KSEL.tc], ['Tasa de estadística %', KSEL.tasa_estadistica], ['Descuento del proveedor %', KSEL.descuento_pct],
@@ -1350,7 +1357,7 @@ function _i(n){ return ({
 const PLUS_SVG = '<svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
 
 </script>
-<script src="manual.js?v=1"></script>
+<script src="manual.js?v=2"></script>
 <script src="adorno-tablas.js?v=abc48a63"></script>
 </body>
 </html>
