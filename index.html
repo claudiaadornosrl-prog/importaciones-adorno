@@ -699,7 +699,9 @@ main { padding: 20px; max-width: 1500px; margin: 0 auto; }
 .etp { height: 5px; background: #e2e8f0; border-radius: 3px; overflow: hidden; } .etp i { display: block; height: 100%; background: var(--green); }
 .paso, .doc { display: flex; align-items: flex-start; gap: 10px; padding: 8px 6px; border-bottom: 1px solid var(--border); font-size: 14px; }
 .paso .pb, .doc .pb { flex: 1; min-width: 0; } .paso .tt, .doc .tt { font-weight: 600; } .paso.e-hecho .tt { text-decoration: line-through; color: var(--muted); } .paso.e-no_aplica, .doc.e-no_aplica { opacity: .5; }
-.paso.venc .fechas { color: var(--red); font-weight: 700; } .paso .det { margin-top: 2px; } .paso .nota { margin-top: 2px; color: var(--primary-dark); }
+.paso.venc .fechas { color: var(--red); font-weight: 700; } .paso .pb { position: relative; } .paso .tt .ayuda { color: var(--primary); font-size: 13px; cursor: help; }
+.paso .det { display: none; position: absolute; left: 0; top: 100%; z-index: 5; max-width: 420px; background: #fffbe6; border: 1px solid #e3c96b; border-radius: 10px; padding: 7px 10px; font-size: 12.5px; color: #4a3f10; box-shadow: 0 4px 14px rgba(0,0,0,.12); margin-top: 2px; }
+.paso:hover .det, .paso.ver .det { display: block; } @media (hover: none) { .paso:hover .det { display: none; } .paso.ver .det { display: block; } } .paso .nota { margin-top: 2px; color: var(--primary-dark); }
 .paso .acc, .doc .acc { display: flex; flex: none; } .paso .acc .btn.ico, .doc .acc .btn.ico { width: 30px; height: 30px; opacity: .55; } .paso:hover .acc .btn.ico, .doc:hover .acc .btn.ico { opacity: 1; }
 .chk { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #cbd5e1; background: #fff; flex: none; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; color: #fff; margin-top: 2px; }
 .chk .ico { width: 16px; height: 16px; } .chk.hecho { background: var(--green); border-color: var(--green); } .chk.en_curso { background: var(--amber); border-color: var(--amber); } .chk.no_aplica { background: #cbd5e1; border-color: #cbd5e1; } .chk:disabled { cursor: default; }
@@ -1103,8 +1105,8 @@ function htmlPasos(){
       ${L.map(p => { const venc = p.fecha_limite && p.estado !== 'hecho' && p.estado !== 'no_aplica' && p.fecha_limite < hoyAR();
         return `<div class="paso e-${p.estado} ${venc ? 'venc' : ''}">
           <button class="chk ${p.estado}" onclick="tildarPaso(${p.id})" title="${p.estado === 'hecho' ? 'Volver a pendiente' : 'Marcar hecho'}" ${puede ? '' : 'disabled'}>${p.estado === 'hecho' ? _i('check') : p.estado === 'en_curso' ? _i('play') : p.estado === 'no_aplica' ? _i('ban') : ''}</button>
-          <div class="pb"><div class="tt">${esc(p.titulo)}${p.responsable ? ` <span class="chip gray chico">${esc(p.responsable)}</span>` : ''}${p.doc_clave ? ` <span class="chip ${docChip(p.doc_clave)} chico" title="Documento que produce este paso">📄 ${esc(docNombre(p.doc_clave))}</span>` : ''}</div>
-            ${p.detalle ? `<div class="mini det">${esc(p.detalle)}</div>` : ''}
+          <div class="pb"><div class="tt" ${p.detalle ? `onclick="this.closest('.paso').classList.toggle('ver')"` : ''}>${p.detalle ? '<span class="ayuda" title="Pasá el mouse o tocá el título para ver la nota">ⓘ</span> ' : ''}${esc(p.titulo)}${p.responsable ? ` <span class="chip gray chico">${esc(p.responsable)}</span>` : ''}${p.doc_clave ? ` <span class="chip ${docChip(p.doc_clave)} chico" title="Documento que produce este paso">📄 ${esc(docNombre(p.doc_clave))}</span>` : ''}</div>
+            ${p.detalle ? `<div class="det">${esc(p.detalle)}</div>` : ''}
             ${p.notas ? `<div class="mini nota">📝 ${esc(p.notas)}</div>` : ''}
             <div class="mini fechas">${p.estado === 'hecho' ? `✓ ${fmtF(p.fecha_hecho)}${p.hecho_por ? ' · ' + esc(p.hecho_por.split('@')[0]) : ''}` : p.fecha_limite ? `${venc ? '⚠ venció' : 'vence'} ${fmtF(p.fecha_limite)}` : ''}</div></div>
           <div class="acc">${puede ? `<button class="btn ico" onclick="estadoPaso(${p.id}, 'en_curso')" title="En curso">${_i('play')}</button><button class="btn ico" onclick="editarPaso(${p.id})" title="Fecha límite, nota, quién">${_i('edit')}</button><button class="btn ico" onclick="estadoPaso(${p.id}, '${p.estado === 'no_aplica' ? 'pendiente' : 'no_aplica'}')" title="${p.estado === 'no_aplica' ? 'Volver a aplicar' : 'No aplica en esta importación'}">${_i('ban')}</button>` : ''}</div>
@@ -1357,7 +1359,7 @@ function _i(n){ return ({
 const PLUS_SVG = '<svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
 
 </script>
-<script src="manual.js?v=5"></script>
+<script src="manual.js?v=6"></script>
 <script src="adorno-tablas.js?v=abc48a63"></script>
 </body>
 </html>
